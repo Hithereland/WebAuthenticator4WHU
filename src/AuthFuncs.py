@@ -2,11 +2,25 @@ import requests as rq
 import time
 import re
 
-
 my_try_url = 'http://baidu.com'
 
 
 # http is necessary, https is not suitable for WHU, HA HA HA HA HA HA
+
+def test_have_auth(try_url: str = my_try_url) -> bool:
+    rcv = rq.Response
+    have_auth = True
+    try:
+        rcv = rq.get(try_url, timeout=1)
+        if rcv.status_code == 200 and (rcv.text[1:5] == 'html'):
+            have_auth = True
+        else:
+            have_auth = False
+    except rq.exceptions.RequestException:
+        have_auth = False
+
+    return have_auth
+
 
 def get_auth_url(try_url: str = my_try_url) -> str:
     failed_times = 0
@@ -134,4 +148,3 @@ def login_and_auth(post_data: str, auth_url: str) -> (int, str):
     rcv = rq.post(url="http://172.19.1.9:8080/eportal/InterFace.do?method=login", data=post_data, headers=header)
     rcv.encoding = rcv.apparent_encoding
     return rcv.status_code, rcv.text
-

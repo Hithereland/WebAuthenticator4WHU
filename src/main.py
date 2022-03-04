@@ -3,7 +3,13 @@ import AuthFuncs
 user_info = {'userId': '123',
              'passwd': '123'}
 
+
 def main():
+    have_auth = AuthFuncs.test_have_auth()
+    if have_auth:
+        print("All is well")
+        return 0
+
     auth_url = AuthFuncs.get_auth_url()
     if auth_url == "Error":
         print("Connection failed, please check the physical connection.")
@@ -17,7 +23,7 @@ def main():
     except LookupError:
         print("Authentication failed")
 
-    print("All is done")
-    return 0
+    main()
+
 
 main()
