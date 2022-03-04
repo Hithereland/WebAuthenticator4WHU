@@ -1,7 +1,6 @@
 import requests as rq
 import time
 import re
-import json
 
 
 my_try_url = 'http://baidu.com'
@@ -10,14 +9,32 @@ my_try_url = 'http://baidu.com'
 # http is necessary, https is not suitable for WHU, HA HA HA HA HA HA
 
 def get_auth_url(try_url: str = my_try_url) -> str:
-    failed_times = 1
-
-    rcv = rq.get(try_url)
-    while rcv.status_code != 200:
-        time.sleep(5)
-        rcv = rq.get(try_url)
+    failed_times = 0
+    status_code = 0
+    rcv = rq.Response
+    try:
+        rcv = rq.get(try_url, timeout=1)
+    except rq.exceptions.RequestException:
         failed_times += 1
-        if failed_times >= 2:
+
+    try:
+        status_code = rcv.status_code
+    except BaseException:
+        status_code = 0
+
+    while status_code != 200:
+        time.sleep(3)
+        failed_times += 1
+        try:
+            rcv = rq.get(try_url, timeout=1)
+        except rq.exceptions.RequestException:
+            failed_times = failed_times
+        try:
+            status_code = rcv.status_code
+        except BaseException:
+            status_code = 0
+
+        if failed_times >= 20:
             return 'Error'
 
     ret = re.search("\'[\\s\\S]+\'", rcv.text).group(0)[1:-1]
